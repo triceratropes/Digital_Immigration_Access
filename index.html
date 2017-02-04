@@ -37,6 +37,13 @@
     js.src = "//connect.facebook.net/en_US/sdk.js";
     fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));
+
+var loginObject;
+
+FB.getLoginStatus(function(response) {
+    console.log("I got: " + response);
+    loginObject = response;
+});
 </script>
 </body>
 </html>
