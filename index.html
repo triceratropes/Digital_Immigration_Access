@@ -115,11 +115,24 @@ window.fbAsyncInit = function() {
     });
     facebookReady.resolve();
 };
+
+function makeImage(src, height, width) {
+    var newImg = new Image(height, width);
+    newImg.src = src;
+    return newImg;
+}
+
+
 $.when(docReady, facebookReady).then(function() {
-    console.log("logging photos now:")
+    globalPhotos = [];
+    console.log("logging photos now:");
     if (typeof getPhotos !== 'undefined') {
         getPhotos( function( photos ) {
             console.log( photos );
+            globalPhotos = photos;
+            for (var i = 0; i <= 10; i++) {
+                document.getElementById('first-facebook-photo').appendChild(makeImage(globalPhotos[i].url, 100, 100));
+            }
         });
     }
 });
@@ -134,10 +147,10 @@ $.when(docReady, facebookReady).then(function() {
     </head>
     <body>
         <div id="fb-root"></div>
+        <div id="first-facebook-photo">
+        </div>
     </body>
 </html>
-
-
 <!-- <!&#45;&#45; https://developers.facebook.com/docs/facebook&#38;#45;login/web#example &#45;&#45;> -->
 <!-- <!DOCTYPE html> -->
 <!-- <html> -->
