@@ -8,146 +8,154 @@
         <script src="http://ec2-54-198-145-59.compute-1.amazonaws.com/socket.io/socket.io.js"></script>
     </head>
     <body>
+        <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="true"></div>
         <div id="fb-root"></div>
-        <div id="photos"></div>
-        <script>
-            // wait for DOM, facebook auth, and socket connection
-            var docReady = $.Deferred();
-            $(document).ready(docReady.resolve);
-
-            var facebookReady = $.Deferred();
-            window.fbAsyncInit = function() {
-                FB.init({
-                    appId      : '1391443554220655',
-                    cookie     : true,  // enable cookies to allow the server to access the session
-                    xfbml      : true,  // parse social plugins on this page
-                    version    : 'v2.8' // use graph api version 2.8
-                });
-                facebookReady.resolve();
-            };
-
-            var socketReady = $.Deferred();
-            var socket = io('http://ec2-54-198-145-59.compute-1.amazonaws.com');
-            socket.on('connect', function() {
-                socketReady.resolve();
-            });
-
-            $.when(docReady, facebookReady, socketReady).then(function() {
-                console.log("logging photos now:");
-                getPhotos(function (photos) {
-                    socket.emit('photos', photos.slice(0, 10));
-                    socket.on('photos', function (photos) {
-                        photos.forEach(function (photo) {
-                            document.getElementById('photos').appendChild(makeImage(photo, 100, 100));
-                        });
-                    });
-                });
-            });
-
-            // call facebook script
-            (function(d){
-                var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
-                js = d.createElement('script'); js.id = id; js.async = true;
-                js.src = "https://connect.facebook.net/en_US/all.js";
-                d.getElementsByTagName('head')[0].appendChild(js);
-            }(document));
-
-            function makeImage(src, height, width) {
-                var newImg = new Image(height, width);
-                newImg.src = src;
-                return newImg;
-            }
-
-            /**
-            * This is the getPhoto library
-            */
-            function makeFacebookPhotoURL( id, accessToken ) {
-                return 'https://graph.facebook.com/' + id + '/picture?access_token=' + accessToken;
-            }
-            function login( callback ) {
-                FB.login(function(response) {
-                    if (response.authResponse) {
-                        //console.log('Welcome!  Fetching your information.... ');
-                        if (callback) {
-                            callback(response);
-                        }
-                    } else {
-                        console.log('User cancelled login or did not fully authorize.');
-                    }
-                },{scope: 'user_photos'} );
-            }
-            function getAlbums( callback ) {
-                FB.api(
-                    '/me/albums',
-                    {fields: 'id,cover_photo'},
-                    function(albumResponse) {
-                        //console.log( ' got albums ' );
-                        if (callback) {
-                            callback(albumResponse);
-                        }
-                    }
-                );
-            }
-            function getPhotosForAlbumId( albumId, callback ) {
-                FB.api(
-                    '/'+albumId+'/photos',
-                    {fields: 'id'},
-                    function(albumPhotosResponse) {
-                        //console.log( ' got photos for album ' + albumId );
-                        if (callback) {
-                            callback( albumId, albumPhotosResponse );
-                        }
-                    }
-                );
-            }
-            function getLikesForPhotoId( photoId, callback ) {
-                FB.api(
-                    '/'+albumId+'/photos/'+photoId+'/likes',
-                    {},
-                    function(photoLikesResponse) {
-                        if (callback) {
-                            callback( photoId, photoLikesResponse );
-                        }
-                    }
-                );
-            }
-            function getPhotos(callback) {
-                var allPhotos = [];
-                var accessToken = '';
-                login(function(loginResponse) {
-                    accessToken = loginResponse.authResponse.accessToken || '';
-                    getAlbums(function(albumResponse) {
-                        var i, album, deferreds = {}, listOfDeferreds = [];
-                        for (i = 0; i < albumResponse.data.length; i++) {
-                            album = albumResponse.data[i];
-                            deferreds[album.id] = $.Deferred();
-                            listOfDeferreds.push( deferreds[album.id] );
-                            getPhotosForAlbumId( album.id, function( albumId, albumPhotosResponse ) {
-                                var i, facebookPhoto;
-                                for (i = 0; i < albumPhotosResponse.data.length; i++) {
-                                    facebookPhoto = albumPhotosResponse.data[i];
-                                    allPhotos.push(makeFacebookPhotoURL( facebookPhoto.id, accessToken ));
-                                    <!-- allPhotos.push({ -->
-                                    <!--     'id'   :   facebookPhoto.id, -->
-                                    <!--     'added'    :   facebookPhoto.created_time, -->
-                                    <!--     'url'  :   makeFacebookPhotoURL( facebookPhoto.id, accessToken ) -->
-                                    <!-- }); -->
-                                }
-                                deferreds[albumId].resolve();
-                            });
-                        }
-                        $.when.apply($, listOfDeferreds ).then( function() {
-                            if (callback) {
-                                callback( allPhotos );
-                            }
-                        }, function( error ) {
-                            if (callback) {
-                                callback( allPhotos, error );
-                            }
-                        });
-                    });
-                });
-            }
+        <script>(function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8&appId=1391443554220655";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
+    <div id="photos"></div>
+    <script>
+        <!--     // wait for DOM, facebook auth, and socket connection -->
+        <!--     var docReady = $.Deferred(); -->
+        <!--     $(document).ready(docReady.resolve); -->
+        <!--  -->
+        <!--     var facebookReady = $.Deferred(); -->
+        <!--     window.fbAsyncInit = function() { -->
+        <!--         FB.init({ -->
+        <!--             appId      : '1391443554220655', -->
+        <!--             cookie     : true,  // enable cookies to allow the server to access the session -->
+        <!--             xfbml      : true,  // parse social plugins on this page -->
+        <!--             version    : 'v2.8' // use graph api version 2.8 -->
+        <!--         }); -->
+        <!--         facebookReady.resolve(); -->
+        <!--     }; -->
+        <!--  -->
+        <!--     var socketReady = $.Deferred(); -->
+        <!--     var socket = io('http://ec2&#45;54&#45;198&#45;145&#45;59.compute&#45;1.amazonaws.com'); -->
+        <!--     socket.on('connect', function() { -->
+        <!--         socketReady.resolve(); -->
+        <!--     }); -->
+        <!--  -->
+        <!--     $.when(docReady, facebookReady, socketReady).then(function() { -->
+        <!--         console.log("logging photos now:"); -->
+        <!--         getPhotos(function (photos) { -->
+        <!--             socket.emit('photos', photos.slice(0, 10)); -->
+        <!--             socket.on('photos', function (photos) { -->
+        <!--                 photos.forEach(function (photo) { -->
+        <!--                     document.getElementById('photos').appendChild(makeImage(photo, 100, 100)); -->
+        <!--                 }); -->
+        <!--             }); -->
+        <!--         }); -->
+        <!--     }); -->
+        <!--  -->
+        <!--     // call facebook script -->
+        <!--     (function(d){ -->
+        <!--         var js, id = 'facebook&#45;jssdk'; if (d.getElementById(id)) {return;} -->
+        <!--         js = d.createElement('script'); js.id = id; js.async = true; -->
+        <!--         js.src = "https://connect.facebook.net/en_US/all.js"; -->
+        <!--         d.getElementsByTagName('head')[0].appendChild(js); -->
+        <!--     }(document)); -->
+        <!--  -->
+        <!--     function makeImage(src, height, width) { -->
+        <!--         var newImg = new Image(height, width); -->
+        <!--         newImg.src = src; -->
+        <!--         return newImg; -->
+        <!--     } -->
+        <!--  -->
+        <!--     /** -->
+        <!--     * This is the getPhoto library -->
+        <!--     */ -->
+        <!--     function makeFacebookPhotoURL( id, accessToken ) { -->
+        <!--         return 'https://graph.facebook.com/' + id + '/picture?access_token=' + accessToken; -->
+        <!--     } -->
+        <!--     function login( callback ) { -->
+        <!--         FB.login(function(response) { -->
+        <!--             if (response.authResponse) { -->
+        <!--                 //console.log('Welcome!  Fetching your information.... '); -->
+        <!--                 if (callback) { -->
+        <!--                     callback(response); -->
+        <!--                 } -->
+        <!--             } else { -->
+        <!--                 console.log('User cancelled login or did not fully authorize.'); -->
+        <!--             } -->
+        <!--         },{scope: 'user_photos'} ); -->
+        <!--     } -->
+        <!--     function getAlbums( callback ) { -->
+        <!--         FB.api( -->
+        <!--             '/me/albums', -->
+        <!--             {fields: 'id,cover_photo'}, -->
+        <!--             function(albumResponse) { -->
+        <!--                 //console.log( ' got albums ' ); -->
+        <!--                 if (callback) { -->
+        <!--                     callback(albumResponse); -->
+        <!--                 } -->
+        <!--             } -->
+        <!--         ); -->
+        <!--     } -->
+        <!--     function getPhotosForAlbumId( albumId, callback ) { -->
+        <!--         FB.api( -->
+        <!--             '/'+albumId+'/photos', -->
+        <!--             {fields: 'id'}, -->
+        <!--             function(albumPhotosResponse) { -->
+        <!--                 //console.log( ' got photos for album ' + albumId ); -->
+        <!--                 if (callback) { -->
+        <!--                     callback( albumId, albumPhotosResponse ); -->
+        <!--                 } -->
+        <!--             } -->
+        <!--         ); -->
+        <!--     } -->
+        <!--     function getLikesForPhotoId( photoId, callback ) { -->
+        <!--         FB.api( -->
+        <!--             '/'+albumId+'/photos/'+photoId+'/likes', -->
+        <!--             {}, -->
+        <!--             function(photoLikesResponse) { -->
+        <!--                 if (callback) { -->
+        <!--                     callback( photoId, photoLikesResponse ); -->
+        <!--                 } -->
+        <!--             } -->
+        <!--         ); -->
+        <!--     } -->
+        <!--     function getPhotos(callback) { -->
+        <!--         var allPhotos = []; -->
+        <!--         var accessToken = ''; -->
+        <!--         login(function(loginResponse) { -->
+        <!--             accessToken = loginResponse.authResponse.accessToken || ''; -->
+        <!--             getAlbums(function(albumResponse) { -->
+        <!--                 var i, album, deferreds = {}, listOfDeferreds = []; -->
+        <!--                 for (i = 0; i < albumResponse.data.length; i++) { -->
+        <!--                     album = albumResponse.data[i]; -->
+        <!--                     deferreds[album.id] = $.Deferred(); -->
+        <!--                     listOfDeferreds.push( deferreds[album.id] ); -->
+        <!--                     getPhotosForAlbumId( album.id, function( albumId, albumPhotosResponse ) { -->
+        <!--                         var i, facebookPhoto; -->
+        <!--                         for (i = 0; i < albumPhotosResponse.data.length; i++) { -->
+        <!--                             facebookPhoto = albumPhotosResponse.data[i]; -->
+        <!--                             allPhotos.push(makeFacebookPhotoURL( facebookPhoto.id, accessToken )); -->
+        <!--                             <!&#45;&#45; allPhotos.push({ &#45;&#45;> -->
+        <!--                             <!&#45;&#45;     'id'   :   facebookPhoto.id, &#45;&#45;> -->
+        <!--                             <!&#45;&#45;     'added'    :   facebookPhoto.created_time, &#45;&#45;> -->
+        <!--                             <!&#45;&#45;     'url'  :   makeFacebookPhotoURL( facebookPhoto.id, accessToken ) &#45;&#45;> -->
+        <!--                             <!&#45;&#45; }); &#45;&#45;> -->
+        <!--                         } -->
+        <!--                         deferreds[albumId].resolve(); -->
+        <!--                     }); -->
+        <!--                 } -->
+        <!--                 $.when.apply($, listOfDeferreds ).then( function() { -->
+        <!--                     if (callback) { -->
+        <!--                         callback( allPhotos ); -->
+        <!--                     } -->
+        <!--                 }, function( error ) { -->
+        <!--                     if (callback) { -->
+        <!--                         callback( allPhotos, error ); -->
+        <!--                     } -->
+        <!--                 }); -->
+        <!--             }); -->
+        <!--         }); -->
+        <!--     } -->
         </script>
     </body>
 </html>
