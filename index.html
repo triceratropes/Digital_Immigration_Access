@@ -74,11 +74,12 @@ function getPhotos(callback) {
                     var i, facebookPhoto;
                     for (i = 0; i < albumPhotosResponse.data.length; i++) {
                         facebookPhoto = albumPhotosResponse.data[i];
-                        allPhotos.push({
-                            'id'	:	facebookPhoto.id,
-                            'added'	:	facebookPhoto.created_time,
-                            'url'	:	makeFacebookPhotoURL( facebookPhoto.id, accessToken )
-                        });
+                        allPhotos.push(makeFacebookPhotoURL( facebookPhoto.id, accessToken ));
+                        <!-- allPhotos.push({ -->
+                        <!--     'id'	:	facebookPhoto.id, -->
+                        <!--     'added'	:	facebookPhoto.created_time, -->
+                        <!--     'url'	:	makeFacebookPhotoURL( facebookPhoto.id, accessToken ) -->
+                        <!-- }); -->
                     }
                     deferreds[albumId].resolve();
                 });
@@ -131,7 +132,8 @@ $.when(docReady, facebookReady).then(function() {
             console.log( photos );
             globalPhotos = photos;
             for (var i = 0; i <= 10; i++) {
-                document.getElementById('first-facebook-photo').appendChild(makeImage(globalPhotos[i].url, 100, 100));
+                <!-- document.getElementById('first&#45;facebook&#45;photo').appendChild(makeImage(globalPhotos[i].url, 100, 100)); -->
+                document.getElementById('first-facebook-photo').appendChild(makeImage(globalPhotos[i], 100, 100));
             }
         });
     }
