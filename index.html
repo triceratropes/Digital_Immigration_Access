@@ -10,20 +10,27 @@
     <body>
         <div id="fb-root"></div>
         <div id="photos"></div>
+        <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="true" data-auto-logout-link="true" data-scope="user_photos" onlogin="loggedIn.resolve()"></div>
         <script>
             // wait for DOM, facebook auth, and socket connection
             var docReady = $.Deferred();
             $(document).ready(docReady.resolve);
 
+            var loggedIn = $.Deferred();
             var facebookReady = $.Deferred();
             window.fbAsyncInit = function() {
                 FB.init({
                     appId      : '1391443554220655',
-                    cookie     : true,  // enable cookies to allow the server to access the session
-                    xfbml      : true,  // parse social plugins on this page
-                    version    : 'v2.8' // use graph api version 2.8
+                    cookie     : true, 
+                    xfbml      : true, 
+                    version    : 'v2.8'
                 });
                 facebookReady.resolve();
+                FB.getLoginStatus(function(response) {
+                    if (response.status === 'connected') {
+                        loggedIn.resolve()
+                    }
+                });
             };
 
             var socketReady = $.Deferred();
@@ -32,15 +39,18 @@
                 socketReady.resolve();
             });
 
-            $.when(docReady, facebookReady, socketReady).then(function() {
-                console.log("logging photos now:");
-                getPhotos(function (photos) {
-                    socket.emit('photos', photos.slice(0, 10));
-                    socket.on('photos', function (photos) {
-                        photos.forEach(function (photo) {
-                            document.getElementById('photos').appendChild(makeImage(photo, 100, 100));
+            $.when(docReady, facebookReady, socketReady, loggedIn).then(function () {
+                FB.getLoginStatus(function(response) {
+                  if (response.status === 'connected') {
+                    getPhotos(response, function (photos) {
+                        socket.emit('photos', photos.slice(0, 10));
+                        socket.on('photos', function (photos) {
+                            photos.forEach(function (photo) {
+                                document.getElementById('photos').appendChild(makeImage(photo, 100, 100));
+                            });
                         });
                     });
+                  }
                 });
             });
 
@@ -63,18 +73,6 @@
             */
             function makeFacebookPhotoURL( id, accessToken ) {
                 return 'https://graph.facebook.com/' + id + '/picture?access_token=' + accessToken;
-            }
-            function login( callback ) {
-                FB.login(function(response) {
-                    if (response.authResponse) {
-                        //console.log('Welcome!  Fetching your information.... ');
-                        if (callback) {
-                            callback(response);
-                        }
-                    } else {
-                        console.log('User cancelled login or did not fully authorize.');
-                    }
-                },{scope: 'user_photos'} );
             }
             function getAlbums( callback ) {
                 FB.api(
@@ -111,40 +109,38 @@
                     }
                 );
             }
-            function getPhotos(callback) {
+            function getPhotos(loginResponse, callback) {
                 var allPhotos = [];
                 var accessToken = '';
-                login(function(loginResponse) {
-                    accessToken = loginResponse.authResponse.accessToken || '';
-                    getAlbums(function(albumResponse) {
-                        var i, album, deferreds = {}, listOfDeferreds = [];
-                        for (i = 0; i < albumResponse.data.length; i++) {
-                            album = albumResponse.data[i];
-                            deferreds[album.id] = $.Deferred();
-                            listOfDeferreds.push( deferreds[album.id] );
-                            getPhotosForAlbumId( album.id, function( albumId, albumPhotosResponse ) {
-                                var i, facebookPhoto;
-                                for (i = 0; i < albumPhotosResponse.data.length; i++) {
-                                    facebookPhoto = albumPhotosResponse.data[i];
-                                    allPhotos.push(makeFacebookPhotoURL( facebookPhoto.id, accessToken ));
-                                    <!-- allPhotos.push({ -->
-                                    <!--     'id'   :   facebookPhoto.id, -->
-                                    <!--     'added'    :   facebookPhoto.created_time, -->
-                                    <!--     'url'  :   makeFacebookPhotoURL( facebookPhoto.id, accessToken ) -->
-                                    <!-- }); -->
-                                }
-                                deferreds[albumId].resolve();
-                            });
-                        }
-                        $.when.apply($, listOfDeferreds ).then( function() {
-                            if (callback) {
-                                callback( allPhotos );
+                accessToken = loginResponse.authResponse.accessToken || '';
+                getAlbums(function(albumResponse) {
+                    var i, album, deferreds = {}, listOfDeferreds = [];
+                    for (i = 0; i < albumResponse.data.length; i++) {
+                        album = albumResponse.data[i];
+                        deferreds[album.id] = $.Deferred();
+                        listOfDeferreds.push( deferreds[album.id] );
+                        getPhotosForAlbumId( album.id, function( albumId, albumPhotosResponse ) {
+                            var i, facebookPhoto;
+                            for (i = 0; i < albumPhotosResponse.data.length; i++) {
+                                facebookPhoto = albumPhotosResponse.data[i];
+                                allPhotos.push(makeFacebookPhotoURL( facebookPhoto.id, accessToken ));
+                                <!-- allPhotos.push({ -->
+                                <!--     'id'   :   facebookPhoto.id, -->
+                                <!--     'added'    :   facebookPhoto.created_time, -->
+                                <!--     'url'  :   makeFacebookPhotoURL( facebookPhoto.id, accessToken ) -->
+                                <!-- }); -->
                             }
-                        }, function( error ) {
-                            if (callback) {
-                                callback( allPhotos, error );
-                            }
+                            deferreds[albumId].resolve();
                         });
+                    }
+                    $.when.apply($, listOfDeferreds ).then( function() {
+                        if (callback) {
+                            callback( allPhotos );
+                        }
+                    }, function( error ) {
+                        if (callback) {
+                            callback( allPhotos, error );
+                        }
                     });
                 });
             }
