@@ -97,31 +97,37 @@
                     version    : 'v2.8'
                 });
                 facebookReady.resolve();
-                FB.getLoginStatus(function(response) {
-                    if (response.status === 'connected') {
-                        loggedIn.resolve()
-                    }
-                });
             };
+
+            var accessToken = null
+            var receivedToken = $.Deferred();
+            $.when(loggedIn).then(function () {
+                FB.getLoginStatus(function(response) {
+                    accessToken = response.authResponse.accessToken;
+                    receivedToken.resolve(accessToken);
+                })
+            })
 
             var socketReady = $.Deferred();
             var socket = io('http://ec2-54-198-145-59.compute-1.amazonaws.com');
             socket.on('connect', function() {
                 socket.on('photos', function (photos) {
-                    photos.forEach(function (photo) {
-                        document.getElementById('photos').appendChild(makeImage(photo, 100, 100));
+                    receivedToken.then(function () {
+                        photos.forEach(function (photo) {
+                            photo = makeFacebookPhotoURL(photo, accessToken)
+                            document.getElementById('photos').appendChild(makeImage(photo, 100, 100));
+                        });
                     });
                 });
                 socketReady.resolve();
             });
 
-            $.when(docReady, facebookReady, socketReady, loggedIn).then(function () {
-                FB.getLoginStatus(function(response) {
-                  if (response.status === 'connected') {
-                    getPhotos(response, function (photos) {
-                        socket.emit('photos', photos.slice(0, 10));
-                    });
-                  }
+            $.when(docReady, socketReady, receivedToken).then(function () {
+                getPhotos(function (photos) {
+                    photos = photos.map(function (photo) {
+                      return photo.split('/')[3]
+                    }).slice(0, 10)
+                    socket.emit('photos', photos);
                 });
             });
 
@@ -180,10 +186,8 @@
                     }
                 );
             }
-            function getPhotos(loginResponse, callback) {
+            function getPhotos(callback) {
                 var allPhotos = [];
-                var accessToken = '';
-                accessToken = loginResponse.authResponse.accessToken || '';
                 getAlbums(function(albumResponse) {
                     var i, album, deferreds = {}, listOfDeferreds = [];
                     for (i = 0; i < albumResponse.data.length; i++) {
@@ -195,11 +199,6 @@
                             for (i = 0; i < albumPhotosResponse.data.length; i++) {
                                 facebookPhoto = albumPhotosResponse.data[i];
                                 allPhotos.push(makeFacebookPhotoURL( facebookPhoto.id, accessToken ));
-                                <!-- allPhotos.push({ -->
-                                <!--     'id'   :   facebookPhoto.id, -->
-                                <!--     'added'    :   facebookPhoto.created_time, -->
-                                <!--     'url'  :   makeFacebookPhotoURL( facebookPhoto.id, accessToken ) -->
-                                <!-- }); -->
                             }
                             deferreds[albumId].resolve();
                         });
