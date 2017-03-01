@@ -110,7 +110,7 @@
                     receivedToken.then(function () {
                         photos.forEach(function (photo) {
                             photo = makeFacebookPhotoURL(photo, accessToken)
-                            document.getElementById('photos').appendChild(makeImage(photo, 100, 100));
+                            $('#photos').prepend(makeImage(photo, 100, 100));
                         });
                     });
                 });
