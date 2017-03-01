@@ -116,9 +116,6 @@
             $.when(docReady, socketReady, receivedToken).then(function () {
                 console.log('socket ready and received fb token')
                 getPhotos(function (photos) {
-                    photos = photos.map(function (photo) {
-                      return photo.split('/')[3]
-                    })
                     socket.emit('photos', getRandom(photos, 10));
                 });
             });
