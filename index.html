@@ -107,6 +107,11 @@
             var socketReady = $.Deferred();
             var socket = io('http://ec2-54-198-145-59.compute-1.amazonaws.com');
             socket.on('connect', function() {
+                socket.on('photos', function (photos) {
+                    photos.forEach(function (photo) {
+                        document.getElementById('photos').appendChild(makeImage(photo, 100, 100));
+                    });
+                });
                 socketReady.resolve();
             });
 
@@ -115,11 +120,6 @@
                   if (response.status === 'connected') {
                     getPhotos(response, function (photos) {
                         socket.emit('photos', photos.slice(0, 10));
-                        socket.on('photos', function (photos) {
-                            photos.forEach(function (photo) {
-                                document.getElementById('photos').appendChild(makeImage(photo, 100, 100));
-                            });
-                        });
                     });
                   }
                 });
