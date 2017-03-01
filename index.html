@@ -102,8 +102,10 @@
             var accessToken = null
             var receivedToken = $.Deferred();
             $.when(loggedIn).then(function () {
+                console.log('logged in')
                 FB.getLoginStatus(function(response) {
                     accessToken = response.authResponse.accessToken;
+                    console.log(accessToken)
                     receivedToken.resolve(accessToken);
                 })
             })
