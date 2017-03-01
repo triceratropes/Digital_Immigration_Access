@@ -73,7 +73,7 @@
         <div id="photos"></div>
         <div id="facebook-group">
             <div id="fb-root"></div>
-            <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="true" data-auto-logout-link="true" data-scope="user_photos" onlogin="loggedIn.resolve()"></div>
+            <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="true" data-auto-logout-link="true" data-scope="user_photos" onlogin="checkLogin()"></div>
         </div>
         <div id="twilio-box">
             <form id="twilio-form" action="">
@@ -87,6 +87,8 @@
             var docReady = $.Deferred();
             $(document).ready(docReady.resolve);
 
+            var accessToken = null
+            
             var loggedIn = $.Deferred();
             var facebookReady = $.Deferred();
             window.fbAsyncInit = function() {
@@ -97,18 +99,8 @@
                     version    : 'v2.8'
                 });
                 facebookReady.resolve();
+                checkLogin()
             };
-
-            var accessToken = null
-            var receivedToken = $.Deferred();
-            $.when(loggedIn).then(function () {
-                console.log('logged in')
-                FB.getLoginStatus(function(response) {
-                    accessToken = response.authResponse.accessToken;
-                    console.log(accessToken)
-                    receivedToken.resolve(accessToken);
-                })
-            })
 
             var socketReady = $.Deferred();
             var socket = io('http://ec2-54-198-145-59.compute-1.amazonaws.com');
@@ -147,6 +139,16 @@
                 var newImg = new Image(height, width);
                 newImg.src = src;
                 return newImg;
+            }
+
+            function checkLogin () {
+                if (!accessToken) {
+                    FB.getLoginStatus(function(response) {
+                        accessToken = response.authResponse.accessToken;
+                        receivedToken.resolve(accessToken);
+                        loggedIn.resolve()
+                    })
+                }
             }
 
             /**
