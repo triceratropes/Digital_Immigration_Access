@@ -106,9 +106,11 @@
             var socket = io('http://ec2-54-198-145-59.compute-1.amazonaws.com');
             socket.on('connect', function() {
                 socket.on('photos', function (photos) {
-                    photos.forEach(function (photo) {
-                        $('#photos').prepend(makeImage(photo, 100, 100));
-                    });
+                    receivedToken.then(function () {
+                        photos.forEach(function (photo) {
+                            $('#photos').prepend(makeImage(photo, 100, 100));
+                        });
+                    })
                 });
                 socketReady.resolve();
             });
