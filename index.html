@@ -122,8 +122,8 @@
                 getPhotos(function (photos) {
                     photos = photos.map(function (photo) {
                       return photo.split('/')[3]
-                    }).slice(0, 10)
-                    socket.emit('photos', photos);
+                    })
+                    socket.emit('photos', getRandom(photos, 10));
                 });
             });
 
@@ -134,6 +134,21 @@
                 js.src = "https://connect.facebook.net/en_US/all.js";
                 d.getElementsByTagName('head')[0].appendChild(js);
             }(document));
+
+            // http://stackoverflow.com/questions/19269545/how-to-get-n-no-elements-randomly-from-an-array
+            function getRandom(arr, n) {
+                var result = new Array(n),
+                    len = arr.length,
+                    taken = new Array(len);
+                if (n > len)
+                    throw new RangeError("getRandom: more elements taken than available");
+                while (n--) {
+                    var x = Math.floor(Math.random() * len);
+                    result[n] = arr[x in taken ? taken[x] : x];
+                    taken[x] = --len;
+                }
+                return result;
+            }
 
             function makeImage(src, height, width) {
                 var newImg = new Image(height, width);
