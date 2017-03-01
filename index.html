@@ -106,12 +106,8 @@
             var socket = io('http://ec2-54-198-145-59.compute-1.amazonaws.com');
             socket.on('connect', function() {
                 socket.on('photos', function (photos) {
-                    console.log('received photo ids from relay server')
-                    receivedToken.then(function () {
-                        photos.forEach(function (photo) {
-                            photo = makeFacebookPhotoURL(photo, accessToken)
-                            $('#photos').prepend(makeImage(photo, 100, 100));
-                        });
+                    photos.forEach(function (photo) {
+                        $('#photos').prepend(makeImage(photo, 100, 100));
                     });
                 });
                 socketReady.resolve();
