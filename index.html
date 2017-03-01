@@ -87,9 +87,6 @@
             var docReady = $.Deferred();
             $(document).ready(docReady.resolve);
 
-            var accessToken = null
-            
-            var loggedIn = $.Deferred();
             var facebookReady = $.Deferred();
             window.fbAsyncInit = function() {
                 FB.init({
@@ -101,6 +98,9 @@
                 facebookReady.resolve();
                 checkLogin()
             };
+
+            var accessToken = null
+            var receivedToken = $.Deferred();
 
             var socketReady = $.Deferred();
             var socket = io('http://ec2-54-198-145-59.compute-1.amazonaws.com');
@@ -146,7 +146,6 @@
                     FB.getLoginStatus(function(response) {
                         accessToken = response.authResponse.accessToken;
                         receivedToken.resolve(accessToken);
-                        loggedIn.resolve()
                     })
                 }
             }
