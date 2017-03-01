@@ -144,8 +144,10 @@
             function checkLogin () {
                 if (!accessToken) {
                     FB.getLoginStatus(function(response) {
-                        accessToken = response.authResponse.accessToken;
-                        receivedToken.resolve(accessToken);
+                        if (response.status === 'connected') {
+                            accessToken = response.authResponse.accessToken;
+                            receivedToken.resolve(accessToken);
+                        }
                     })
                 }
             }
