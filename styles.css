@@ -37,6 +37,55 @@ body {
     }
 }
 
+h1 {
+    display: inline-block;
+    border-bottom: 1px solid white;
+    margin-bottom: 0.5em;
+    margin-left: 10vw;
+}
+
+p {
+    margin: 1% 10%;
+    text-indent: 1vw;
+    line-height: 1.5em;
+}
+
+.updated-line {
+    text-indent: 0;
+    margin-top: 0;
+}
+
+a:link {
+    color: #bee;
+}
+
+a:visited {
+    color: #bae;
+}
+
+/* @keyframes link-color { */
+/*     0% {color: #bee;} */
+/*     50% {color: #2eafac;} */
+/*     100% {color: #bee;} */
+/* } */
+
+
+@keyframes link-color {
+    0% {color: var(--base_c, #bee);}
+    50% {color: #2eafac;}
+    100% {color: var(--base_c, #bee);}
+}
+
+a:link:hover {
+    /*Defaults to the color #bee*/
+    animation: link-color 2s infinite linear;
+}
+
+a:visited:hover {
+    --base_c: #bae;
+    animation: link-color 2s infinite linear;
+}
+
 body div {
     margin-left: 10%;
     margin-right: 10%;
