@@ -1,3 +1,8 @@
+@font-face {
+    font-family: VCR-OSDMono;
+    src: url(VCR_OSD_MONO_1.001.ttf);
+}
+
 @keyframes bg-animate{
     0% {background-color: black;}
     50% {background-color: white;}
@@ -14,7 +19,7 @@ body {
 }
 
 body {
-    font-family: Monospace;
+    font-family: VCR-OSDMono, Monospace;
     background-color: black;
     /* animation: bg-animate 6s infinite linear; */
     color: white;
