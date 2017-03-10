@@ -106,13 +106,10 @@
             var  accessToken    =  null;
             var  receivedToken  =  $.Deferred();
             var  uid            =  null;
-            var number          =  window.localStorage.number;
+            var  number         =  window.localStorage.number;
 
             $.when(docReady).then(function () {
-                if (number) {
-                    $('#twilio-form').hide()
-                    $('.intro-div').css('margin-bottom', '0')
-                }
+                if (number) hideForm()
             })
 
             var facebookReady = $.Deferred();
@@ -275,9 +272,13 @@
                 number = document.querySelector('#twilio-number-input').value;
                 window.localStorage.setItem('number', number)
                 socket.emit('number', number);
-                $("#twilio-form input").val('')
+                hideForm()
             }
         });
+        function hideForm () {
+            $("#twilio-form").hide()
+            $('.intro-div').css('margin-bottom', '0')
+        }
         </script>
     </body>
 </html>
