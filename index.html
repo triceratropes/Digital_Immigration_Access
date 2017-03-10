@@ -265,6 +265,7 @@
             e.preventDefault();
             var number = document.querySelector('#twilio-number-input').value;
             socket.emit('number', number);
+            $("#twilio-form").val('')
         });
         </script>
     </body>
