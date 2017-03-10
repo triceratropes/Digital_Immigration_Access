@@ -265,16 +265,19 @@
                     required: true,
                     phoneUS: true
                 }
+            },
+            submitHandler: function() {
+                if (!number) {
+                    e.preventDefault();
+                    number = document.querySelector('#twilio-number-input').value;
+                    window.localStorage.setItem('number', number)
+                    socket.emit('number', number);
+                    hideForm()
+                }
             }
         });
         $("#twilio-form").submit(function(e){
-            if (!number) {
-                e.preventDefault();
-                number = document.querySelector('#twilio-number-input').value;
-                window.localStorage.setItem('number', number)
-                socket.emit('number', number);
-                hideForm()
-            }
+            e.preventDefault();
         });
         function hideForm () {
             $("#twilio-form").hide()
