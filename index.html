@@ -6,6 +6,8 @@
         <title>Photos with Friends!</title>
         <script src="jquery-1.9.0.js"></script>
         <script src="https://socket.memoryarchive.net/socket.io/socket.io.js"></script>
+        <script src="https://cdn.jsdelivr.net/jquery.validation/1.15.0/jquery.validate.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/jquery.validation/1.15.0/additional-methods.min.js"></script>
         <link rel="stylesheet" href="reset.css">
         <link rel="stylesheet" href="styles.css">
         <meta name="viewport" content="initial-scale=1">
@@ -84,32 +86,33 @@
                 move along.
             </div>
         </div>
+        <div id="twilio-box">
+            <form id="twilio-form">
+                <label for="telNum">To continue with the installation, enter your phone number below:</label>
+                <input type="tel" name="telNum" id="twilio-number-input">
+                <button onclick="sendNumber()">Submit</button>
+            </form>
+        </div>
         <div id="photos"></div>
         <div id="facebook-group">
             <div id="fb-root"></div>
             <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="true" data-auto-logout-link="true" data-scope="user_photos" onlogin="checkLogin()"></div>
-        </div>
-        <div id="twilio-box">
-            <form id="twilio-form" action="">
-                <label for="telNum">Please enter your phone number here:</label>
-                <input type="tel" name="telNum" class="twilio-number-input">
-                <button>Submit</button>
-            </form>
         </div>
         <script>
             // wait for DOM, facebook auth, and socket connection
             var docReady = $.Deferred();
             $(document).ready(docReady.resolve);
 
-            var accessToken = null
-            var receivedToken = $.Deferred();
+            var  accessToken    =  null;
+            var  receivedToken  =  $.Deferred();
+            var  uid            =  null;
 
             var facebookReady = $.Deferred();
             window.fbAsyncInit = function() {
                 FB.init({
                     appId      : '1391443554220655',
-                    cookie     : true, 
-                    xfbml      : true, 
+                    cookie     : true,
+                    xfbml      : true,
                     version    : 'v2.8'
                 });
                 facebookReady.resolve();
@@ -173,6 +176,7 @@
                     FB.getLoginStatus(function(response) {
                         if (response.status === 'connected') {
                             accessToken = response.authResponse.accessToken;
+                            uid = response.authResponse.userID;
                             receivedToken.resolve(accessToken);
                         }
                     })
@@ -248,6 +252,22 @@
                     });
                 });
             }
+            function sendNumber() {
+                if (accessToken && uid) {
+                    console.log('accessToken recieved, sending uid and phone number');
+                    socket.emit('uid', uid);
+                    var number = document.querySelector('#twilio-number-input').value;
+                    socket.emit('number', number);
+                }
+            }
+        $( "#twilio-form" ).validate({
+            rules: {
+                field: {
+                    required: true,
+                    phoneUS: true
+                }
+            }
+        });
         </script>
     </body>
 </html>
