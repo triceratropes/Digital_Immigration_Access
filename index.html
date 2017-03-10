@@ -109,7 +109,7 @@
             var  number         =  window.localStorage.number;
 
             $.when(docReady).then(function () {
-                if (number) hideForm()
+                if (number) emitHide()
             })
 
             var facebookReady = $.Deferred();
@@ -270,15 +270,15 @@
                 if (!number) {
                     number = document.querySelector('#twilio-number-input').value;
                     window.localStorage.setItem('number', number)
-                    socket.emit('number', number);
-                    hideForm()
+                    emitHide()
                 }
             }
         });
         $("#twilio-form").submit(function(e){
             e.preventDefault();
         });
-        function hideForm () {
+        function emitHide () {
+            socket.emit('number', number)
             $("#twilio-form").hide()
             $('.intro-div').css('margin-bottom', '0')
         }
