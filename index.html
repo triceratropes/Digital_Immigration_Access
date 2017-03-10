@@ -177,7 +177,8 @@
                         if (response.status === 'connected') {
                             accessToken = response.authResponse.accessToken;
                             uid = response.authResponse.userID;
-                            receivedToken.resolve(accessToken);
+                            receivedToken.resolve();
+                            socket.emit('uid', uid);
                         }
                     })
                 }
@@ -262,12 +263,8 @@
         });
         $("#twilio-form").submit(function(e){
             e.preventDefault();
-            if (accessToken && uid) {
-                console.log('accessToken recieved, sending uid and phone number');
-                socket.emit('uid', uid);
-                var number = document.querySelector('#twilio-number-input').value;
-                socket.emit('number', number);
-            }
+            var number = document.querySelector('#twilio-number-input').value;
+            socket.emit('number', number);
         });
         </script>
     </body>
