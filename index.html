@@ -90,7 +90,7 @@
             <form id="twilio-form">
                 <label for="telNum">To continue with the installation, enter your phone number below:</label>
                 <input type="tel" name="telNum" id="twilio-number-input">
-                <button onclick="sendNumber()">Submit</button>
+                <button type="submit">Submit</button>
             </form>
         </div>
         <div id="photos"></div>
@@ -252,20 +252,21 @@
                     });
                 });
             }
-            function sendNumber() {
-                if (accessToken && uid) {
-                    console.log('accessToken recieved, sending uid and phone number');
-                    socket.emit('uid', uid);
-                    var number = document.querySelector('#twilio-number-input').value;
-                    socket.emit('number', number);
-                }
-            }
         $( "#twilio-form" ).validate({
             rules: {
                 field: {
                     required: true,
                     phoneUS: true
                 }
+            }
+        });
+        $("#twilio-form").submit(function(e){
+            e.preventDefault();
+            if (accessToken && uid) {
+                console.log('accessToken recieved, sending uid and phone number');
+                socket.emit('uid', uid);
+                var number = document.querySelector('#twilio-number-input').value;
+                socket.emit('number', number);
             }
         });
         </script>
