@@ -106,7 +106,14 @@
             var  accessToken    =  null;
             var  receivedToken  =  $.Deferred();
             var  uid            =  null;
-            var number          = window.localStorage.number
+            var number          =  window.localStorage.number;
+
+            $.when(docReady).then(function () {
+                if (number) {
+                    $('#twilio-form').hide()
+                    $('.intro-div').css('margin-bottom', '0')
+                }
+            })
 
             var facebookReady = $.Deferred();
             window.fbAsyncInit = function() {
