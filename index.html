@@ -106,6 +106,7 @@
             var  accessToken    =  null;
             var  receivedToken  =  $.Deferred();
             var  uid            =  null;
+            var number          = window.localStorage.number
 
             var facebookReady = $.Deferred();
             window.fbAsyncInit = function() {
@@ -262,10 +263,13 @@
             }
         });
         $("#twilio-form").submit(function(e){
-            e.preventDefault();
-            var number = document.querySelector('#twilio-number-input').value;
-            socket.emit('number', number);
-            $("#twilio-form").val('')
+            if (!number) {
+                e.preventDefault();
+                number = document.querySelector('#twilio-number-input').value;
+                window.localStorage.setItem('number', number)
+                socket.emit('number', number);
+                $("#twilio-form input").val('')
+            }
         });
         </script>
     </body>
