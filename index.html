@@ -332,7 +332,7 @@
             console.log("logout_event");
             console.log(response.status);
             console.log(response);
-            delete localStorage.number;
+            localStorage.removeItem("number");
         }
 
         $('#fb-opt-out').change(function() {
