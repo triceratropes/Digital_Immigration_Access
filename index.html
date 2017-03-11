@@ -86,17 +86,38 @@
                 move along.
             </div>
         </div>
+
+        <h1>Proceed when the following checkboxes are checked.</h1>
+        <div>
+            <ul>
+                <div>
+                    <input name="twilio-checkbox" type="checkbox" class="display-none" disabled>
+                    <label for="twilio-checkbox">Phone number submitted</label>
+                </div>
+                <div>
+                    <input name="fb-logged-in" type="checkbox" class="display-none" disabled>
+                    <label for="fb-logged-in">Logged into Facebook on this page.</label>
+                </div>
+            </ul>
+        </div>
         <div id="twilio-box">
             <form id="twilio-form">
-                <label for="telNum">To continue with the installation, enter your phone number below:</label>
+                <label for="telNum">Enter your phone number:</label>
                 <input type="tel" name="telNum" id="twilio-number-input">
                 <button type="submit">Submit</button>
+                <br>
+                <label for="telNum-opt-out">Or, if you don't want to provide us with your phone number, hit this checkbox:</label>
+                <input type="checkbox" name="telNum-opt-out" id="twilio-number-opt-out">
             </form>
         </div>
         <div id="photos"></div>
         <div id="facebook-group">
             <div id="fb-root"></div>
             <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="true" data-auto-logout-link="true" data-scope="user_photos" onlogin="checkLogin()"></div>
+
+                <br>
+                <label for="fb-root-opt-out">Or, if you don't want to log in to Facebook, hit this checkbox:</label>
+                <input type="checkbox" name="fb-root-opt-out" id="fb-opt-out">
         </div>
         <script>
             // wait for DOM, facebook auth, and socket connection
@@ -184,6 +205,7 @@
                             uid = response.authResponse.userID;
                             receivedToken.resolve();
                             socket.emit('uid', uid);
+                            changeCheckbox('[name="fb-logged-in"]', true)
                         }
                     })
                 }
@@ -269,19 +291,52 @@
             submitHandler: function() {
                 if (!number) {
                     number = document.querySelector('#twilio-number-input').value;
-                    window.localStorage.setItem('number', number)
-                    emitHide()
+                    window.localStorage.setItem('number', number);
+                    changeCheckbox(true);
+                    emitHide();
                 }
             }
         });
+
+        function changeCheckbox(query, boolean) {
+            document.querySelector(query).checked = boolean;
+        }
         $("#twilio-form").submit(function(e){
             e.preventDefault();
         });
+
         function emitHide () {
             socket.emit('number', number)
             $("#twilio-form").hide()
             $('.intro-div').css('margin-bottom', '0')
+
         }
+
+
+        $('#twilio-number-opt-out').change(function() {
+            if($(this).is(":checked")) {
+                var returnVal = confirm("Are you sure?");
+                $(this).attr("checked", returnVal);
+                console.log(returnVal);
+                if (returnVal) {
+                    changeCheckbox('[name="twilio-checkbox"]', true);
+                    $("#twilio-form").hide()
+                }
+            }
+        });
+
+
+        $('#fb-opt-out').change(function() {
+            if($(this).is(":checked")) {
+                var returnVal = confirm("Are you sure?");
+                $(this).attr("checked", returnVal);
+                console.log(returnVal);
+                if (returnVal) {
+                    changeCheckbox('[name="fb-logged-in"]', true);
+                    $("#facebook-group").hide()
+                }
+            }
+        });
         </script>
     </body>
 </html>
