@@ -1,3 +1,6 @@
+* {
+    max-width: 100vw;
+}
 @font-face {
     font-family: VCR-OSDMono;
     src: url(VCR_OSD_MONO_1.001.ttf);
@@ -107,6 +110,35 @@ body div {
     }
 }
 
+[type="checkbox"] {
+    --size: 25px;
+    height: var(--size);
+    width:  var(--size);
+}
+
+.display-none {
+    display: none;
+}
+
+:root {
+    --checkbox-size: 2em;
+}
+
+[type="checkbox"] + label::before {
+    content:  '☒';
+    font-size: var(--checkbox-size);
+    display: inline-block;
+}
+
+[type="checkbox"]:checked + label {
+    background-color: green;
+}
+
+[type="checkbox"]:checked + label::before {
+    content:  '☑';
+    background-color: green;
+}
+
 #facebook-group,
 #twilio-box {
     width: 100%;
@@ -118,6 +150,7 @@ body div {
 
 
 #facebook-group {
+    color: black;
     background-color: white;
 }
 #twilio-box {
