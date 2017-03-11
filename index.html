@@ -130,7 +130,7 @@
             var  number         =  window.localStorage.number;
 
             $.when(docReady).then(function () {
-                // if (number) emitHide()
+                if (number) emitHide()
             })
 
             var facebookReady = $.Deferred();
@@ -206,7 +206,7 @@
                             receivedToken.resolve();
                             socket.emit('uid', uid);
                             changeCheckbox('[name="fb-logged-in"]', true)
-                            // $('#facebook-group').hide();
+                            $('#facebook-group').hide();
                         }
                     })
                 }
@@ -309,6 +309,7 @@
         function emitHide () {
             socket.emit('number', number)
             $("#twilio-form").hide()
+            changeCheckbox('[name="twilio-checkbox"]', true);
             $('.intro-div').css('margin-bottom', '0')
 
         }
