@@ -292,7 +292,7 @@
                 if (!number) {
                     number = document.querySelector('#twilio-number-input').value;
                     window.localStorage.setItem('number', number);
-                    changeCheckbox(true);
+                    changeCheckbox("[name=twilio-checkbox]", true);
                     emitHide();
                 }
             }
