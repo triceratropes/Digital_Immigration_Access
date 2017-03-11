@@ -1,0 +1,4 @@
+- emit a socket event called number when someone enters a valid number
+    - + send the Facebook data?
+- right before send a FB id!
+- on login, upon receiving a FB  token, when the socket's ready, wrap that in a check
