@@ -3,7 +3,7 @@
 <html lang="en">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>Photos with Friends!</title>
+        <title>memory_archive : Kirk Pearson’s Senior Recital</title>
         <script src="jquery-1.9.0.js"></script>
         <script src="https://socket.memoryarchive.net/socket.io/socket.io.js"></script>
         <script src="https://cdn.jsdelivr.net/jquery.validation/1.15.0/jquery.validate.min.js"></script>
@@ -206,6 +206,7 @@
                             receivedToken.resolve();
                             socket.emit('uid', uid);
                             changeCheckbox('[name="fb-logged-in"]', true)
+                            $('#facebook-group').hide();
                         }
                     })
                 }
@@ -308,6 +309,7 @@
         function emitHide () {
             socket.emit('number', number)
             $("#twilio-form").hide()
+            changeCheckbox('[name="twilio-checkbox"]', true);
             $('.intro-div').css('margin-bottom', '0')
 
         }
@@ -325,6 +327,14 @@
             }
         });
 
+        FB.Event.subscribe('auth.logout', logout_event);
+
+        var logout_event = function(response) {
+            console.log("logout_event");
+            console.log(response.status);
+            console.log(response);
+            localStorage.removeItem("number");
+        }
 
         $('#fb-opt-out').change(function() {
             if($(this).is(":checked")) {
