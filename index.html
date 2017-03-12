@@ -309,7 +309,6 @@
         function emitHide () {
             socket.emit('number', number)
             $("#twilio-form").hide()
-            changeCheckbox('[name="twilio-checkbox"]', true);
             $('.intro-div').css('margin-bottom', '0')
 
         }
@@ -337,11 +336,14 @@
         }
 
         $('#fb-opt-out').change(function() {
+            console.log('boop')
             if($(this).is(":checked")) {
+                console.log('beep')
                 var returnVal = confirm("Are you sure?");
                 $(this).attr("checked", returnVal);
                 console.log(returnVal);
                 if (returnVal) {
+                    console.log('bloop')
                     changeCheckbox('[name="fb-logged-in"]', true);
                     $("#facebook-group").hide()
                 }
