@@ -131,6 +131,32 @@
 
             $.when(docReady).then(function () {
                 if (number) emitHide()
+                $('#twilio-number-opt-out').change(function() {
+                    if($(this).is(":checked")) {
+                        var returnVal = confirm("Are you sure?");
+                        $(this).attr("checked", returnVal);
+                        console.log(returnVal);
+                        if (returnVal) {
+                            changeCheckbox('[name="twilio-checkbox"]', true);
+                            $("#twilio-form").hide()
+                        }
+                    }
+                });
+
+                $('#fb-opt-out').change(function() {
+                    console.log('boop')
+                    if($(this).is(":checked")) {
+                        console.log('beep')
+                        var returnVal = confirm("Are you sure?");
+                        $(this).attr("checked", returnVal);
+                        console.log(returnVal);
+                        if (returnVal) {
+                            console.log('bloop')
+                            changeCheckbox('[name="fb-logged-in"]', true);
+                            $("#facebook-group").hide()
+                        }
+                    }
+                });
             })
 
             var facebookReady = $.Deferred();
@@ -313,19 +339,6 @@
 
         }
 
-
-        $('#twilio-number-opt-out').change(function() {
-            if($(this).is(":checked")) {
-                var returnVal = confirm("Are you sure?");
-                $(this).attr("checked", returnVal);
-                console.log(returnVal);
-                if (returnVal) {
-                    changeCheckbox('[name="twilio-checkbox"]', true);
-                    $("#twilio-form").hide()
-                }
-            }
-        });
-
         FB.Event.subscribe('auth.logout', logout_event);
 
         var logout_event = function(response) {
@@ -334,21 +347,6 @@
             console.log(response);
             localStorage.removeItem("number");
         }
-
-        $('#fb-opt-out').change(function() {
-            console.log('boop')
-            if($(this).is(":checked")) {
-                console.log('beep')
-                var returnVal = confirm("Are you sure?");
-                $(this).attr("checked", returnVal);
-                console.log(returnVal);
-                if (returnVal) {
-                    console.log('bloop')
-                    changeCheckbox('[name="fb-logged-in"]', true);
-                    $("#facebook-group").hide()
-                }
-            }
-        });
         </script>
     </body>
 </html>
